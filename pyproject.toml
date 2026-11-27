@@ -1,0 +1,54 @@
+[project]
+name = "titanspan-app"
+version = "0.1.0"
+description = "The official application skeleton for the Titanspan framework."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = ["titanspan>=0.1.0.dev0,<0.2.0"]
+
+[dependency-groups]
+dev = [
+    "fastapi>=0.115,<1",
+    "pyright>=1.1.400,<2",
+    "pytest>=8.3,<10",
+    "ruff>=0.14,<0.15",
+    "uvicorn>=0.34,<1",
+]
+
+[tool.ruff]
+line-length = 80
+target-version = "py312"
+src = ["app", "bootstrap", "config", "routes", "tests"]
+
+[tool.ruff.lint]
+select = ["ANN", "B", "D", "E", "F", "I"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+include = ["app", "bootstrap", "config", "routes", "tests"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+pythonpath = ["."]
+strict_config = true
+strict_markers = true
+testpaths = ["tests"]
+markers = [
+    "integration: exercises the real application and ASGI lifecycle",
+    "unit: checks isolated application behavior",
+]
+
+[tool.uv]
+package = false
+default-groups = ["dev"]
+
+[tool.uv.sources]
+titanspan = { git = "https://github.com/titanspan/framework.git", rev = "ab0538c4cdeaa6d69fbaaf8b54eabd5eafca7be3" }
