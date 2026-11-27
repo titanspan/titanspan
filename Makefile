@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help install dev console test test-unit test-integration lint format \
-	format-check typecheck ci
+	format-check syntax typecheck ci
 
 help: ## Show available development commands
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -32,7 +32,10 @@ format: ## Format Python source with Ruff
 format-check: ## Check Ruff formatting without changing files
 	uv run ruff format --check app bootstrap config routes tests
 
+syntax: ## Compile application and test Python files
+	uv run python -m compileall -q app bootstrap config routes tests
+
 typecheck: ## Run strict Pyright checks
 	uv run pyright
 
-ci: install lint format-check typecheck test ## Run the local CI checks
+ci: install lint format-check syntax typecheck test ## Run the local CI checks

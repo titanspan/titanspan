@@ -55,7 +55,8 @@ Titanspan. Keep it small, runnable, and focused on application-owned code.
 - `make console ARGS="queue:greet developer"` runs a native sync job.
 - `make test` runs unit and integration tests.
 - `make lint`, `make format`, and `make typecheck` run the individual checks.
-- `make ci` runs the lock, lint, format, type, and test checks.
+- `make syntax` checks Python compilation.
+- `make ci` runs the lock, lint, format, syntax, type, and test checks.
 
 ## Tests and configuration
 

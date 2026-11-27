@@ -104,7 +104,8 @@ make test
 
 The suite includes an isolated service test and integration tests for HTTP,
 native Queue fakes, the Console, route discovery, dependency injection, and
-application shutdown.
+application shutdown. Run `make ci` to check the lockfile, lint, formatting,
+syntax, strict types, and both test groups.
 
 ## Application structure
 

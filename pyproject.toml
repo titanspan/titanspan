@@ -23,6 +23,7 @@ src = ["app", "bootstrap", "config", "routes", "tests"]
 
 [tool.ruff.lint]
 select = ["ANN", "B", "D", "E", "F", "I"]
+extend-select = ["E501", "ERA"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
