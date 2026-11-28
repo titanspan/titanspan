@@ -1,4 +1,4 @@
-![Titanspan mark](assets/titanspan-mark.png)
+![Titanspan mark](public/assets/titanspan-mark.png)
 
 # Titanspan
 
@@ -11,144 +11,183 @@ Titanspan is an expressive, async-first Python framework for intelligent
 applications, AI agents, stateful workflows, and high-throughput data
 processing.
 
-This repository provides the official application skeleton for building with
-Titanspan. It depends on the framework and keeps application code separate
-from framework infrastructure.
+This repository is the official application skeleton for Titanspan. It keeps
+application code here and relies on the separate framework distribution for
+native infrastructure.
 
 ## About Titanspan
 
-The framework is pre-alpha and has not been published to PyPI. This skeleton
-pins it to a verified commit on the framework's `main` branch. The working
-example uses Foundation, configuration, dependency injection, HTTP, Routing,
-and Console. The framework roadmap identifies AI agents, stateful workflows,
-and authentication as planned, with advanced Database and Queue capabilities
-still in progress. The sample Queue job runs inline by default. This starter
-does not configure persistence, an external queue broker, authentication, or
-an AI provider.
+The framework is pre-alpha and is not published on PyPI. This project pins a
+verified framework commit from `main` in `uv.lock`. The starter demonstrates
+Foundation, configuration, dependency injection, HTTP, Routing, Console,
+Cache, Filesystem, Hashing, Logging, and synchronous Queue execution. Other
+capabilities remain under development; see the
+[framework roadmap](https://github.com/titanspan/framework/blob/main/ROADMAP.md)
+and [integration requirements](https://github.com/titanspan/titanspan/issues/1).
 
-- Framework repository: <https://github.com/titanspan/framework>
+- Framework: <https://github.com/titanspan/framework>
 - Documentation: <https://titanspan.github.io/framework/>
-- Roadmap: <https://github.com/titanspan/framework/blob/main/ROADMAP.md>
 
 ## Requirements
 
 - Python 3.12 or newer
 - [uv](https://docs.astral.sh/uv/)
-- GNU Make (optional; the same commands are available through `uv run`)
+- GNU Make (optional)
 
 ## Installation
 
 ```sh
 git clone https://github.com/titanspan/titanspan.git
 cd titanspan
-uv sync --locked
-cp .env.example .env
+make setup
 ```
 
-The lockfile pins the framework source commit. No separate framework checkout
-or external service is required.
+`make setup` installs the locked dependencies, creates local runtime
+directories, and copies `.env.example` to `.env` only when `.env` does not
+already exist. The application uses the pinned framework Git dependency; a
+separate framework checkout is not required.
+
+The same dependency installation is available with `uv sync --locked`.
+`titanspan-app` is the local application project name. It is not the framework
+distribution and is not published.
 
 ## Environment configuration
 
-`config/app.py` maps these settings through Titanspan's configuration loader:
+`config/` contains the native Titanspan configuration mappings. The defaults
+run locally without external infrastructure:
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `APP_NAME` | `Titanspan` | Name shown by the example application. |
-| `APP_ENV` | `local` | Application environment label. |
-| `APP_DEBUG` | `false` | Enables detailed development diagnostics when set to `true`. |
-| `QUEUE_CONNECTION` | `sync` | Runs registered jobs inline without a broker. |
-| `QUEUE_DEFAULT_QUEUE` | `default` | Logical queue name used by the example. |
+- Cache uses process-local memory.
+- Queue uses synchronous execution.
+- Filesystem uses private local storage; public assets are mounted separately
+  from `public/assets/`.
+- Hashing uses Argon2id.
+- Logging writes to the console.
 
-Keep secrets in your local `.env` or deployment environment. Do not commit
-credentials or enable debug mode in production.
+Review `.env.example` for supported environment values. Keep credentials in
+your local environment, do not commit `.env`, and keep debug mode disabled in
+production. Redis and RabbitMQ Queue connections and Redis Cache are selectable
+when their framework driver integrations are installed. They are not needed
+for the default application.
 
 ## Running the application
+
+Start the development server:
 
 ```sh
 make dev
 ```
 
-The server listens on <http://127.0.0.1:8000>. The same command can be run
-without Make:
+The application listens on <http://127.0.0.1:8000>. Its public endpoints are:
+
+- `GET /` displays the branded welcome page.
+- `GET /health` returns the application health status.
+- `GET /api/v1/greetings/{name}` returns a JSON greeting.
+
+`public/assets/` is mounted at `/assets`. Private application storage is not
+served. To run with production dependencies from the checkout:
 
 ```sh
-uv run uvicorn app.asgi:app --reload
+uv sync --locked --no-dev
+uv run uvicorn app.asgi:app --host 0.0.0.0 --port 8000
 ```
 
-Example endpoints:
+Foundation owns the application lifecycle, request context, routing,
+validation responses, and generic error handling. `bootstrap/app.py` is the
+canonical ASGI composition root. The framework's current global Console does
+not expose a public way to use this factory while retaining its built-in
+command catalog; see the tracked [framework integration requirement](https://github.com/titanspan/titanspan/issues/1).
 
-- `GET /` returns the welcome response.
-- `GET /health` returns the local health status.
-- `GET /api/v1/greetings/{name}` returns a configured JSON greeting.
+## Console and development commands
 
-Foundation's ASGI lifecycle supplies request context, request IDs, validation
-responses, and safe generic server errors. Add app-specific middleware or
-exception handlers through the native builder when an application policy
-needs them.
-
-The native Titanspan Console uses the same application service and lifecycle.
-The queue command dispatches a registered job through the native synchronous
-connection:
+The framework's native Console includes its built-in commands and discovers
+the application `inspire` command through the declared entry point:
 
 ```sh
-make console ARGS="greet developer"
-make console ARGS="queue:greet developer"
+make console ARGS="about"
+make console ARGS="route:list"
+make console ARGS="config:validate"
+make console ARGS="inspire"
 ```
 
-## Running tests
+The Console and ASGI server use native application discovery from the project
+root. Database migration and seeding commands are not available in the pinned
+framework revision; SQLite integration is tracked in
+[issue #1](https://github.com/titanspan/titanspan/issues/1). A Queue worker
+requires a configured queued backend and its driver integration; the default
+sync connection executes jobs inline and does not need a worker.
 
-```sh
-make test
-```
+GNU Make targets:
 
-The suite includes an isolated service test and integration tests for HTTP,
-native Queue fakes, the Console, route discovery, dependency injection, and
-application shutdown. Run `make ci` to check the lockfile, lint, formatting,
-syntax, strict types, and both test groups.
+| Command | Purpose |
+| --- | --- |
+| `make setup` | Install dependencies and safely initialize local files. |
+| `make install` | Install the locked environment with uv. |
+| `make dev` | Run the local ASGI server with reload enabled. |
+| `make console ARGS="about"` | Run the native Titanspan Console. |
+| `make test` | Run unit and integration tests. |
+| `make lint` | Run Ruff lint checks. |
+| `make format` | Format Python source with Ruff. |
+| `make typecheck` | Run strict Pyright checks. |
+| `make ci` | Run lock, lint, formatting, syntax, type, and test checks. |
 
 ## Application structure
 
 ```text
 app/
-  console/                 Native application command
-  http/middleware/         Application-owned HTTP middleware
-  http/controllers/        Application-owned HTTP controller
-  jobs/                    Native Queue job declarations
-  models/                  Application-owned models
-  providers/               Application service registrations
-  services/                Application business logic
-  asgi.py                   Canonical ASGI application
-bootstrap/app.py            Titanspan composition root
-config/app.py               Environment-backed app settings
-config/queue.py             Synchronous native Queue settings
-database/
-  factories/                Application data factories
-  migrations/               Database schema migrations
-  seeders/                  Development data seeders
-routes/web.py               Native route discovery hook
-storage/                    Application runtime files
-tests/integration/          Real ASGI application behavior
-tests/unit/                 Isolated application behavior
+  http/controllers/       Application HTTP actions
+  jobs/                   Trusted native Queue jobs
+  providers/              Application-specific container bindings
+  services/               Application business logic
+bootstrap/
+  app.py                  Canonical Application composition root
+  providers.py            Shared application provider inventory
+  cache/                  Framework-generated bootstrap artifacts
+config/                   Native component configuration
+database/                 Database integration notes; native APIs pending
+public/assets/            Publicly served branding and CSS
+routes/
+  api.py                  JSON API routes
+  console.py              Application Console command discovery
+  web.py                  Welcome and health routes
+storage/
+  app/private/            Private application files
+  app/public/             Application-owned public disk files
+  framework/              Runtime and test artifacts
+  logs/                   Local file logs when selected
+tests/
+  conftest.py             Shared native application test helpers
+  integration/            Framework, HTTP, Console, and Queue behavior
+  unit/                   Isolated application behavior
 ```
 
-Add application modules when they have a real use. As framework APIs become
-available, applications can organize their own agents, tools, workflows,
-memory, and data-processing code under `app/`; this starter does not provide
-temporary engines for those features. Database model, migration, factory, and
-seeder examples await the framework's standard Database dependencies and
-automatic provider and Console registration. See [Database integration](database/README.md).
+The project declares its application providers and commands through native
+`titanspan.providers` and `titanspan.commands` entry points. Foundation
+automatically registers native framework providers. Add app-owned agents,
+tools, workflows, memory, or data-processing code when the framework APIs they
+need are available; this starter does not include substitute engines.
 
-## Documentation
+## Testing
 
-Read the [Titanspan documentation](https://titanspan.github.io/framework/)
-for verified framework APIs and the [framework repository](https://github.com/titanspan/framework)
-for source, issues, and framework contributions.
+```sh
+make test
+make ci
+```
 
-## Contributing
+Integration tests use Titanspan's application testing helpers for HTTP,
+configuration, and Queue behavior, and exercise the canonical ASGI bootstrap
+and its shutdown lifecycle. The framework test helpers currently accept
+provider inventories rather than the complete application factory; that
+integration gap is recorded in [issue #1](https://github.com/titanspan/titanspan/issues/1).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for skeleton-specific contribution
-guidance. Report framework defects and propose framework APIs in
+## Documentation and contribution
+
+- [Titanspan documentation](https://titanspan.github.io/framework/)
+- [Framework source and contributions](https://github.com/titanspan/framework)
+- [Skeleton contribution guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+
+Report starter issues in this repository. Direct framework defects and
+framework feature requests to
 [titanspan/framework](https://github.com/titanspan/framework).
 
 ## License
