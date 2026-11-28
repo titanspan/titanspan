@@ -18,5 +18,15 @@ build/
 
 # Runtime output
 *.log
-/storage/*
-!/storage/.gitkeep
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/app/private/*
+!/storage/app/private/.gitignore
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore

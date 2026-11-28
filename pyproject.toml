@@ -1,3 +1,7 @@
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
 [project]
 name = "titanspan-app"
 version = "0.1.0"
@@ -5,15 +9,24 @@ description = "The official application skeleton for the Titanspan framework."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-dependencies = ["titanspan>=0.1.0.dev0,<0.2.0"]
+dependencies = [
+    "fastapi>=0.115,<1",
+    "titanspan>=0.1.0.dev0,<0.2.0",
+    "uvicorn>=0.34,<1",
+]
+
+[project.entry-points."titanspan.providers"]
+application = "bootstrap.providers:AppServiceProvider"
+queue = "bootstrap.providers:AppQueueServiceProvider"
+
+[project.entry-points."titanspan.commands"]
+inspire = "routes.console:inspire"
 
 [dependency-groups]
 dev = [
-    "fastapi>=0.115,<1",
     "pyright>=1.1.400,<2",
     "pytest>=8.3,<10",
     "ruff>=0.14,<0.15",
-    "uvicorn>=0.34,<1",
 ]
 
 [tool.ruff]
@@ -48,8 +61,12 @@ markers = [
 ]
 
 [tool.uv]
-package = false
+package = true
 default-groups = ["dev"]
+
+[tool.uv.build-backend]
+module-name = ["app", "bootstrap", "routes"]
+module-root = ""
 
 [tool.uv.sources]
 titanspan = { git = "https://github.com/titanspan/framework.git", rev = "ab0538c4cdeaa6d69fbaaf8b54eabd5eafca7be3" }

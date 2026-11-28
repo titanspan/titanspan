@@ -1322,30 +1322,32 @@ dependencies = [
 [[package]]
 name = "titanspan-app"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
+    { name = "fastapi" },
     { name = "titanspan" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "fastapi" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "ruff" },
-    { name = "uvicorn" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "titanspan", git = "https://github.com/titanspan/framework.git?rev=ab0538c4cdeaa6d69fbaaf8b54eabd5eafca7be3" }]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.115,<1" },
+    { name = "titanspan", git = "https://github.com/titanspan/framework.git?rev=ab0538c4cdeaa6d69fbaaf8b54eabd5eafca7be3" },
+    { name = "uvicorn", specifier = ">=0.34,<1" },
+]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "fastapi", specifier = ">=0.115,<1" },
     { name = "pyright", specifier = ">=1.1.400,<2" },
     { name = "pytest", specifier = ">=8.3,<10" },
     { name = "ruff", specifier = ">=0.14,<0.15" },
-    { name = "uvicorn", specifier = ">=0.34,<1" },
 ]
 
 [[package]]

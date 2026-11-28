@@ -9,4 +9,5 @@ config = {
     "name": env("APP_NAME", "Titanspan"),
     "env": env("APP_ENV", "local"),
     "debug": env("APP_DEBUG", False),
+    "url": env("APP_URL", "http://127.0.0.1:8000"),
 }

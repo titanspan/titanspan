@@ -1,32 +1,32 @@
-"""Exercise the native Console command and its application services.
-
-The tests use the production parser, container, and lifecycle.
-"""
+"""Exercise native framework commands and application command discovery."""
 
 import pytest
-from app.console import console
+from bootstrap.app import create_application
+from titanspan.console import Console
+from titanspan.console.cli import console as framework_console
 from titanspan.console.testing import ConsoleTester
 
 
 @pytest.mark.integration
-def test_greet_command_resolves_application_service() -> None:
-    """Run the real parser and resolve the greeting through Titanspan DI.
-
-    The command receives its service from the native application Container.
-    """
-    result = ConsoleTester(console).invoke(["greet", "Ada"])
+def test_native_catalog_discovers_application_inspire_command() -> None:
+    """Keep application commands in the framework's native command catalog."""
+    native_console = framework_console.discover_commands()
+    result = ConsoleTester(native_console).invoke(["inspire"])
 
     assert result.exit_code == 0
-    assert "Hello from Titanspan, Ada!" in result.stdout
+    assert "Engineer beyond limits." in result.stdout
 
 
 @pytest.mark.integration
-def test_queue_command_executes_the_native_sync_job() -> None:
-    """Resolve the registered job and return its result from inline work.
+def test_custom_factory_has_an_independent_command_catalog() -> None:
+    """Show the current public factory and built-in catalog composition gap."""
+    native_console = framework_console.discover_commands()
+    native_help = ConsoleTester(native_console).invoke(["--help"])
+    application_console = Console(application_factory=create_application)
+    application_help = ConsoleTester(application_console).invoke(["--help"])
 
-    The command exercises Queue's synchronous application connection.
-    """
-    result = ConsoleTester(console).invoke(["queue:greet", "Ada"])
-
-    assert result.exit_code == 0
-    assert "Hello from Titanspan, Ada!" in result.stdout
+    assert native_help.exit_code == 0
+    assert "route:list" in native_help.stdout
+    assert "inspire" in native_help.stdout
+    assert application_help.exit_code == 0
+    assert "route:list" not in application_help.stdout

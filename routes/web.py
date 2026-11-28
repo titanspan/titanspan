@@ -1,4 +1,4 @@
-"""Register the starter's welcome, health, and JSON API routes.
+"""Register browser-facing welcome and health routes.
 
 Foundation discovers this module through the native route hook.
 """
@@ -24,7 +24,3 @@ def register_routes(router: Router) -> None:
     """
     router.get("/", (WelcomeController, "index")).name("welcome")
     router.get("/health", health).name("health")
-    router.get(
-        "/api/v1/greetings/{name}",
-        (WelcomeController, "greet"),
-    ).name("api.greetings.show")

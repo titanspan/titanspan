@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install dev console test test-unit test-integration lint format \
+.PHONY: help setup install dev console test test-unit test-integration lint format \
 	format-check syntax typecheck ci
 
 help: ## Show available development commands
@@ -9,11 +9,20 @@ help: ## Show available development commands
 install: ## Install the locked application and development dependencies
 	uv sync --locked
 
+setup: install ## Install dependencies and safely prepare local directories
+	@mkdir -p storage/app/private storage/app/public
+	@mkdir -p storage/framework/cache storage/framework/testing storage/logs
+	@if test -e .env; then \
+		printf '%s\n' '.env exists; leaving it unchanged'; \
+	else \
+		cp -n .env.example .env; \
+	fi
+
 dev: ## Start the local ASGI application with reload enabled
 	uv run uvicorn app.asgi:app --reload
 
-console: ## Run a native Titanspan command (pass ARGS="greet developer")
-	uv run python -m app.console $(ARGS)
+console: ## Run the unified native catalog (pass ARGS="about")
+	uv run titanspan $(ARGS)
 
 test: test-unit test-integration ## Run unit and HTTP integration tests
 
