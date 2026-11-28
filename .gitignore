@@ -18,6 +18,9 @@ build/
 
 # Runtime output
 *.log
+*.db
+*.sqlite
+*.sqlite3
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
 /storage/app/private/*
